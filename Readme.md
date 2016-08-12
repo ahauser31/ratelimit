@@ -12,12 +12,12 @@
 [node-image]: https://img.shields.io/badge/node.js-%3E=_0.11-red.svg?style=flat-square
 [node-url]: http://nodejs.org/download/
 
- Rate limiter middleware for koa.
+ Rate limiter middleware for koa 2
 
 ## Installation
 
 ```js
-$ npm install koa-ratelimit
+$ npm install koa-ratelimit@next
 ```
 
 ## Example
@@ -26,7 +26,7 @@ $ npm install koa-ratelimit
 var ratelimit = require('koa-ratelimit');
 var redis = require('redis');
 var koa = require('koa');
-var app = koa();
+var app = new Koa();
 
 // apply rate limit
 
@@ -46,8 +46,8 @@ app.use(ratelimit({
 
 // response middleware
 
-app.use(function *(){
-  this.body = 'Stuff!';
+app.use(function (ctx, next){
+  ctx.body = 'Stuff!';
 });
 
 app.listen(3000);

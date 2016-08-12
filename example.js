@@ -2,7 +2,7 @@
 var ratelimit = require('./');
 var redis = require('redis');
 var koa = require('koa');
-var app = koa();
+var app = new Koa();
 
 // apply rate limit
 
@@ -14,8 +14,8 @@ app.use(ratelimit({
 
 // response middleware
 
-app.use(function *(){
-  this.body = 'Stuff!';
+app.use(function (ctx, next){
+  ctx.body = 'Stuff!';
 });
 
 app.listen(4000);
