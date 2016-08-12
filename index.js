@@ -25,6 +25,9 @@ module.exports = ratelimit;
  *  - `remaining` remaining number of requests ['X-RateLimit-Remaining']
  *  - `reset` reset timestamp ['X-RateLimit-Reset']
  *  - `total` total number of requests ['X-RateLimit-Limit']
+ *  - `retry` retry after time ['X-Retry-After']
+ * - `errorMsg` text in body of error response ['Rate limit exceeded, retry in ']
+ * - `appendRetryTime` append retry time to error body text [true]
  *
  * @param {Object} opts
  * @return {Function}
@@ -37,6 +40,10 @@ function ratelimit(opts) {
   opts.headers.remaining = opts.headers.remaining || 'X-RateLimit-Remaining';
   opts.headers.reset = opts.headers.reset || 'X-RateLimit-Reset';
   opts.headers.total = opts.headers.total || 'X-RateLimit-Limit';
+  opts.headers.retry = opts.headers.retry || 'X-Retry-After';
+  opts.errorMsg = opts.errorMsg || 'Rate limit exceeded, retry in ';
+  opts.appendRetryTime = opts.appendRetryTime || true;
+  opts.throw = opts.throw || false;
 
   return function (ctx, next){
     var id = opts.id ? opts.id(ctx) : ctx.ip;
@@ -65,10 +72,10 @@ function ratelimit(opts) {
 
       var delta = (limit.reset * 1000) - Date.now() | 0;
       var after = limit.reset - (Date.now() / 1000) | 0;
-      ctx.set('Retry-After', after);
+      ctx.set(opts.headers.retry, after);
 
       ctx.status = 429;
-      ctx.body = 'Rate limit exceeded, retry in ' + ms(delta, { long: true });
+      ctx.body = opts.errorMsg + (opts.appendRetryTime ? ms(delta, { long: true }) : '');
 
       if (opts.throw) {
         ctx.throw(ctx.status, ctx.body, { headers: headers });

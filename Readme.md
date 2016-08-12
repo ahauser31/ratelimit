@@ -17,7 +17,7 @@
 ## Installation
 
 ```js
-$ npm install koa-ratelimit@next
+$ npm install koa-ratelimit@koa2
 ```
 
 ## Example
@@ -41,7 +41,9 @@ app.use(ratelimit({
     remaining: 'Rate-Limit-Remaining',
     reset: 'Rate-Limit-Reset',
     total: 'Rate-Limit-Total'
-  }
+  },
+  errorMsg: 'Rate limit exceeded, retry in ',
+  appendRetryTime: true
 }));
 
 // response middleware
@@ -64,6 +66,10 @@ console.log('listening on port 3000');
   - `remaining` remaining number of requests [`'X-RateLimit-Remaining'`]
   - `reset` reset timestamp [`'X-RateLimit-Reset'`]
   - `total` total number of requests [`'X-RateLimit-Limit'`]
+  - `retry` retry after time [`'X-Retry-After'`]
+ - `throw` throw error if rate limit exceeded [false]
+ - `errorMsg` text in body of error response [`'Rate limit exceeded, retry in '`]
+ - `appendRetryTime` append retry time to error body text [true]
 
 ## Responses
 
