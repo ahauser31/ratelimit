@@ -42,8 +42,8 @@ function ratelimit(opts) {
   opts.headers.total = opts.headers.total || 'X-RateLimit-Limit';
   opts.headers.retry = opts.headers.retry || 'X-Retry-After';
   opts.errorMsg = opts.errorMsg || 'Rate limit exceeded, retry in ';
-  opts.appendRetryTime = opts.appendRetryTime || true;
-  opts.throw = opts.throw || false;
+  opts.appendRetryTime = (typeof opts.appendRetryTime !== 'undefined') ? opts.appendRetryTime : true;
+  opts.throw = (typeof opts.throw !== 'undefined') ? opts.throw : false;
 
   return function (ctx, next){
     var id = opts.id ? opts.id(ctx) : ctx.ip;
