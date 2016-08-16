@@ -61,7 +61,7 @@ console.log('listening on port 3000');
  - `db` redis connection instance
  - `max` max requests within `duration` [2500]
  - `duration` of limit in milliseconds [3600000]
- - `id` id to compare requests [ip]
+ - `id` id to compare requests [`(ctx) => (return ctx.ip)`]
  - `headers` custom header names
   - `remaining` remaining number of requests [`'X-RateLimit-Remaining'`]
   - `reset` reset timestamp [`'X-RateLimit-Reset'`]
@@ -70,6 +70,7 @@ console.log('listening on port 3000');
  - `throw` throw error if rate limit exceeded [false]
  - `errorMsg` text in body of error response [`'Rate limit exceeded, retry in '`]
  - `appendRetryTime` append retry time to error body text [true]
+ - `log` logging function to receive error message [`(ctx, msg) => ()`]
 
 ## Responses
 

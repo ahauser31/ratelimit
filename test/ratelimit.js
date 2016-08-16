@@ -14,7 +14,9 @@ describe('ratelimit middleware', function() {
 
   before(function(done) {
     db.keys('limit:*', function(err, rows) {
-      rows.forEach(db.del, db);
+      rows.forEach( (element) => {
+        db.del(element, () => {});  
+      });
     });
 
     done();
@@ -118,7 +120,7 @@ describe('ratelimit middleware', function() {
     it('responds with 429 when rate limit is exceeded', function(done) {
       request(app.listen())
         .get('/')
-        .expect('X-RateLimit-Remaining', 0)
+        .expect('x-rateLimit-remaining', 0)
         .expect(429)
         .end(done);
     });
@@ -238,5 +240,42 @@ describe('ratelimit middleware', function() {
         })
         .end(done);
     });
+  });
+  
+  describe('logging function', function() {
+    var app, logMsg, logStatus;
+
+    beforeEach(function(done) {
+      app = new Koa();
+      logMsg = null;
+      logStatus = 500;
+
+      app.use(ratelimit({
+        db: db,
+        errorMsg: 'ERROR_RATE_LIMIT_EXCEEDED',
+        appendRetryTime: false,
+        throw: false,
+        log: function(ctx, msg) { logMsg = msg; logStatus = ctx.status; }
+      }));
+  
+      
+      app.use(function (ctx, next) {
+        ctx.body = 'Not blocked!';
+      });
+      
+      done();
+    });
+    
+    it('should log out correct error message', function(done) {
+      request(app.listen())
+        .get('/')
+        .expect(429)
+        .expect( (res) => {
+          logMsg.should.equal('ERROR_RATE_LIMIT_EXCEEDED');
+          logStatus.should.equal(429);
+        })
+        .end(done);
+    });
+    
   });
 });

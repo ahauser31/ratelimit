@@ -20,7 +20,7 @@ module.exports = ratelimit;
  * - `duration` limit duration in milliseconds [1 hour]
  * - `max` max requests per `id` [2500]
  * - `db` database connection
- * - `id` id to compare requests [ip]
+ * - `id` id to compare requests [ (ctx) => (return ctx.ip) ]
  * - `headers` custom header names
  *  - `remaining` remaining number of requests ['X-RateLimit-Remaining']
  *  - `reset` reset timestamp ['X-RateLimit-Reset']
@@ -28,6 +28,7 @@ module.exports = ratelimit;
  *  - `retry` retry after time ['X-Retry-After']
  * - `errorMsg` text in body of error response ['Rate limit exceeded, retry in ']
  * - `appendRetryTime` append retry time to error body text [true]
+ * - `log` logging function to receive error message [(ctx, msg) => ()]
  *
  * @param {Object} opts
  * @return {Function}
@@ -76,10 +77,10 @@ function ratelimit(opts) {
 
       ctx.status = 429;
       ctx.body = opts.errorMsg + (opts.appendRetryTime ? ms(delta, { long: true }) : '');
+      
+      if (opts.log) opts.log(ctx, opts.errorMsg);
 
-      if (opts.throw) {
-        ctx.throw(ctx.status, ctx.body, { headers: headers });
-      }
+      if (opts.throw) ctx.throw(ctx.status, ctx.body, { headers: headers });
     });
   }
 }
